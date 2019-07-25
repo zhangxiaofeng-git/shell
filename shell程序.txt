@@ -1,30 +1,30 @@
-1.��дhell world�ű���
+1.编写hell world脚本。
 #!/bin/bash
 echo "hello world"
 
-
-2.ͨ��λ�ñ�������Linuxϵͳ�˻������롣
+derefewqrewqrewewrewqrewqrweq
+2.通过位置变量创建Linux系统账户及密码。
 #!/bin/bash
-#$1��ִ�нű��ĵ�һ��������$2��ִ�нű��ĵڶ�������
+#$1是执行脚本的第一个参数，$2是执行脚本的第二个参数
 useradd "$1"
 echo "$2" | passwd --stdin "$1"
 
 
-3.ÿ��5ʹ��tar�����/var/log�µ�������־�ļ���
+3.每周5使用tar命令备份/var/log下的所有日志文件。
 ]# vim /root/logbak.sh
 #!/bin/bash
-#��д���ݽű������ݺ���ļ����������ڱ�ǩ����ֹ����ı��ݽ�ǰ��ı������ݸ���
-#ע��date������Ҫʹ�÷��������������������ڼ���<tab>������
+#编写备份脚本，备份后的文件名包含日期标签，防止后面的备份将前面的备份数据覆盖
+#注意date命令需要使用反引号括起来，反引号在键盘<tab>键上面
 tar -zcf log-`date +%Y%m%d`.tar.gz /var/log  &> /dev/null
 
-]# crontab -e   #��д�ƻ�����ִ�б��ݽű�
-00 03 * * 5 /root/logbak.sh #ÿ��5ִ��/root/logbak.sh�ű����������ƻ�����������д�����ˣ�
+]# crontab -e   #编写计划任务，执行备份脚本
+00 03 * * 5 /root/logbak.sh #每周5执行/root/logbak.sh脚本（有其它计划任务是往下写就行了）
 
 
-4.һ������LNMP(RPM���汾)��
+4.一键部署LNMP(RPM包版本)。
 #!/bin/bash
-#ʹ��yum��װ����LNMP,��Ҫ��ǰ���yumԴ������ýű���ʧ��
-#���ű�ʹ����centos7.2��RHEL7.2
+#使用yum安装部署LNMP,需要提前配好yum源，否则该脚本会失败
+#本脚本使用于centos7.2或RHEL7.2
 yum -y install httpd &> /dev/null
 yum -y install mariadb mariadb-devel mariadb-server &> /dev/null
 yum -y install php php-mysql &> /dev/null
@@ -33,45 +33,45 @@ systemctl enable httpd mariadb &> /dev/null
 rpm -q httpd mariadb mariadb-devel mariadb-server php php-mysql
 
 
-5.ʵʱ��ر����ڴ��Ӳ��ʣ��ռ䣬ʣ���ڴ�С��500M��������ʣ��ռ�С��1000Mʱ�����ͱ����ʼ���root����Ա��
+5.实时监控本机内存和硬盘剩余空间，剩余内存小于500M、根分区剩余空间小于1000M时，发送报警邮件给root管理员。
 #!/bin/bash
-#��ȡ������ʣ��ռ�
+#提取根分区剩余空间
 disk_size=$(df / | awk '/\//{print $4}')
-#��ȡ�ڴ�ʣ��ռ�
+#提取内存剩余空间
 mem_size=$(free | awk '/Mem/{print $4}')
 while :
 do
-#ע���ڴ�ʹ�����ȡ�Ŀռ��С������kbΪ��λ
+#注意内存和磁盘提取的空间大小都是以kb为单位
 if [ $disk_size -le 512000 -a $mem_size -le 1024000 ];then
     mail -s Warning root << EOF
-Insufficient resources,��Դ����
+Insufficient resources,资源不足
 EOF
 fi
 done
 
 
-6.�ű�����һ��100���ڵ����������ʾ�û������֣������û������룬��ʾ�û��¶��ˣ���С�˻�´��ˣ�ֱ���û��¶Խű�������
+6.脚本生成一个100以内的随机数，提示用户猜数字，根据用户的输入，提示用户猜对了，猜小了或猜大了，直至用户猜对脚本结束。
 #!/bin/bash
-#RANDOMΪϵͳ�Դ���ϵͳ������ֵΪ0-32767�������
-#ʹ��ȡ���㷨���������Ϊ1-100�������
+#RANDOM为系统自带的系统变量，值为0-32767的随机数
+#使用取余算法将随机数变为1-100的随机数
 num=$[RANDOM%100+1]
-#ʹ��read��ʾ�û�������
-#ʹ��if�ж��û������ֵĴ�С��ϵ��-eq�����ڣ�,ne�������ڣ�,gt�����ڣ�,ge�����ڵ��ڣ�,lt��С�ڣ�,le��С�ڵ��ڣ�
+#使用read提示用户猜数字
+#使用if判断用户猜数字的大小关系：-eq（等于）,ne（不等于）,gt（大于）,ge（大于等于）,lt（小于）,le（小于等于）
 while :
 do
-    read -p "�����������һ��1-100������������:" cai
+    read -p "请算机生成了一个1-100的随机数，你猜:" cai
     if [ $num -eq $cai ];then
-         echo "��ϲ���¶���"
+         echo "恭喜，猜对了"
          exit
     elif [ $cai -lt $num ];then
-         echo "Oops,��С��"
+         echo "Oops,猜小了"
     else
-         echo "Oops,�´���"
+         echo "Oops,猜大了"
     fi
 done
 
 
-7.��Ȿ����ǰ�û��Ƿ�Ϊ�𼶹���Ա������ǹ���Ա����ʹ��yum��װvsftpd,������ǣ�����ʾ���ǹ���Ա(ʹ���ַ����ԱȰ汾)
+7.检测本机当前用户是否为起级管理员，如果是管理员，则使用yum安装vsftpd,如果不是，则提示您非管理员(使用字符串对比版本)
 #!/bin/bash
 if [ $USER == "root" ];then 
   yum -y install vsftpd  &> /dev/null
@@ -79,11 +79,11 @@ if [ $USER == "root" ];then
   systemctl enable vsftpd &> /dev/null
   rpm -q vsftpd
 else
-  echo "�����ǹ���Ա��û��Ȩ�ް�װ����"
+  echo "您不是管理员，没有权限安装软件"
 fi
 
 
-8.��Ȿ����ǰ�û��Ƿ�Ϊ�𼶹���Ա������ǹ���Ա����ʹ��yum��װvsftpd,������ǣ�����ʾ���ǹ���Ա(ʹ��UID���ֶԱȰ汾)
+8.检测本机当前用户是否为起级管理员，如果是管理员，则使用yum安装vsftpd,如果不是，则提示您非管理员(使用UID数字对比版本)
 #!/bin/bash
 if [ $UID -eq 0 ];then   
   yum -y install vsftpd  &> /dev/null
@@ -91,27 +91,27 @@ if [ $UID -eq 0 ];then
   systemctl enable vsftpd &> /dev/null
   rpm -q vsftpd
 else
-  echo "�����ǹ���Ա��û��Ȩ�ް�װ����"
+  echo "您不是管理员，没有权限安装软件"
 fi
 
 
-9.��д�ű��ű��Զ�������Ӧ���˻����������롣��ʾ�û������û���,����û��������˻���������ʾ���������˻������˳��ű�������û�������û����Ѿ����ڣ�����ʾ���û��Ѿ����ڲ��˳��ű���������ʾ�û��������룬����û�û���������룬��ͳһʹ��Ĭ�ϵ�123456��ΪĬ�����롣
+9.编写脚本脚本自动创建相应的账户及配置密码。提示用户输入用户名,如果用户不输入账户名，则提示必须输入账户名并退出脚本；如果用户输入的用户名已经存在，则提示该用户已经存在并退出脚本；否则提示用户输入密码，如果用户没有输入密码，则统一使用默认的123456作为默订密码。
 #!/bin/bash
-read -p "���������û�����" a
-#ʹ��-z�����ж�һ�������Ƿ�Ϊ�գ����Ϊ�գ���ʾ�û����������˻��������˳��ű����˳���Ϊ2
-#û�������û����ű��˳���ʹ��$?�鿴�ķ�����Ϊ2
+read -p "请您输入用户名：" a
+#使用-z可以判断一个变量是否为空，如果为空，提示用户必须输入账户名，并退出脚本，退出码为2
+#没有输入用户名脚本退出后，使用$?查看的返回码为2
 if [ -z $a ];then
-   echo "���������˻���"
+   echo "必须输入账户名"
    exit 2
 else
    useradd $a  &> /dev/null
    if [ $? -ne 0 ];then
-      echo "������ĸ��˻��Ѵ���"
+      echo "您输入的该账户已存在"
       exit 3
    else
-#ʹ��stty -echo/echo�ر�/����shell�Ļ��Թ���
+#使用stty -echo/echo关闭/开启shell的回显功能
       stty -echo
-      read -p "��������$a�û������룺" b
+      read -p "请您输入$a用户的密码：" b
       stty echo
       if [ -z $b ];then
         echo "123456" | passwd --stdin $a
@@ -120,151 +120,151 @@ else
       fi
    fi
 fi
-����
+或者
 #!/bin/bash
-read -p "���������û�����" a
-#ʹ��-z�����ж�һ�������Ƿ�Ϊ�գ����Ϊ�գ���ʾ�û����������˻��������˳��ű����˳���Ϊ2
-#û�������û����ű��˳���ʹ��$?�鿴�ķ�����Ϊ2
+read -p "请您输入用户名：" a
+#使用-z可以判断一个变量是否为空，如果为空，提示用户必须输入账户名，并退出脚本，退出码为2
+#没有输入用户名脚本退出后，使用$?查看的返回码为2
 if [ -z $a ];then
-   echo "���������˻���"
+   echo "必须输入账户名"
    exit 2
 else
    useradd $a  &> /dev/null
    if [ $? -ne 0 ];then
-      echo "������ĸ��˻��Ѵ���"
+      echo "您输入的该账户已存在"
       exit 3
    else
-#ʹ��stty -echo/echo�ر�/����shell�Ļ��Թ���
+#使用stty -echo/echo关闭/开启shell的回显功能
       stty -echo
-      read -p "��������$a�û������룺" b
+      read -p "请您输入$a用户的密码：" b
       stty echo
-      b=${b:-123456}   #//ʹ�ó�ֵ�ļ�⼰����
+      b=${b:-123456}   #//使用初值的检测及设置
       echo $b | passwd --stdin $a
    fi
 fi
 
 
-10.������ʾ�û�����3���������ű��������ִ�С�����������3�����֡�
+10.依次提示用户输入3个整数，脚本根据数字大小依次排序输出3个数字。
 #!/bin/bash
-read -p "�������һ��������" a
-read -p "������ڶ���������" b
-read -p "�����������������" c
-#����˭��˭С����󶼴�ӡecho "$a,$b,$c"
-#a����Զ����С��ֵ��$b����Զ���м�ֵ,$c��Զ�����ֵ
-#�������Ĳ���������˳����ı����Ĵ洢˳���磺���Խ�a��b��ֵ�Ե�
+read -p "请输入第一个整数：" a
+read -p "请输入第二个整数：" b
+read -p "请输入第三个整数：" c
+#不管谁大谁小，最后都打印echo "$a,$b,$c"
+#a中永远存最小的值，$b中永远存中间值,$c永远存最大值
+#如果输入的不是这样的顺序，则改变数的存储顺序，如：可以将a和b的值对调
 tmp=0
-#���a����b,�Ͱ�a��ֵ��b��ֵ�Ե���ȷ��a�����д������Сֵ
+#如果a大于b,就把a的值和b的值对调，确保a变量中存的是最小值
 if [ $a -gt $b ];then
    d=$a
    a=$b
    b=$d
-fi   #//��ѭ����Ľ��Ϊa=b��a��ֵΪС��
-#���a����c,�Ͱ�a��ֵ��c��ֵ�Ե���ȷ��a�����д������Сֵ
+fi   #//此循环后的结果为a=b即a的值为小的
+#如果a大于c,就把a的值和c的值对调，确保a变量中存的是最小值
 if [ $a -gt $c ];then
    d=$a
    a=$c
    c=$d
-fi   #//��ѭ����Ľ��Ϊa=c��a��ֵΪС��,���һ��ѭ�����бȽϺ�a��ֵ��Ϊ��С����
-#���b����c,�Ͱ�b��ֵ��c��ֵ�Ե���ȷ��b�����д����Сһ���ֵ
+fi   #//此循环后的结果为a=c即a的值为小的,与第一个循环进行比较后a的值变为最小的了
+#如果b大于c,就把b的值和c的值对调，确保b变量中存的是小一点的值
 if [ $b -gt $c ];then
    d=$b
    b=$c
    c=$d
-fi   #//��ѭ����Ľ��Ϊb=c��b��ֵΪС��,����һ��������бȽϺ�b��ֵ��Ϊ�ڶ�С���ˣ�ʣ�µ�c��Ϊ������
-echo "���������Ϊ��$a,$b,$c"
+fi   #//此循不后的结果为b=c即b的值为小的,与上一个结果进行比较后b的值变为第二小的了，剩下的c变为最大的了
+echo "排序后数据为：$a,$b,$c"
 
 
-11.��д�ű���ʵ���˻�<ʯͷ����������>��Ϸ
+11.编写脚本，实现人机<石头，剪刀，布>游戏
 #!/bin/bash
 b=$[RANDOM%3]
-echo "�����������ʾѡ�����ĳ�ȭ����"
-echo "1.ʯͷ"
-echo "2.����"
-echo "3.��"
-read -p "��ѡ���ȭ����1-3�е�һ����" d
+echo "请根据下列提示选择您的出拳手势"
+echo "1.石头"
+echo "2.剪刀"
+echo "3.布"
+read -p "请选择出拳手势1-3中的一个：" d
 case $d in
 1)
    if [ $b -eq 0 ];then
-       echo "ƽ��"
+       echo "平局"
    elif  [ $b -eq 1 ];then
-       echo "����"
+       echo "你羸"
    else
-       echo "�������"
+       echo "计算机羸"
    fi;;
 2)
    if [ $b -eq 0 ];then
-       echo "����"
+       echo "你羸"
    elif [ $b -eq 1 ];then
-       echo "�������"
+       echo "计算机羸"
    else
-       echo "ƽ��"
+       echo "平局"
   fi;;
 3)
    if [ $b -eq 0 ];then
-       echo "�������"
+       echo "计算机羸"
    elif [ $b -eq 1 ];then
-       echo "ƽ��"
+       echo "平局"
    else
-       echo "����"
+       echo "你羸"
    fi;;
 *)
-   echo "����������ȭ����1-3�е�һ��"
+   echo "你必须输入出拳手势1-3中的一个"
 esac
 
 
-12.��д�ű�����192.168.4.0/24������������Щ�������ڿ���״̬����Щ�������ڹػ�״̬��for�汾��
+12.编写脚本测试192.168.4.0/24整个网段中哪些主机处于开机状态，哪些主机处于关机状态（for版本）
 #!/bin/bash
 for i in {1..254}
 do
    ping -c 2 -i 0.1 -w 1 192.168.4.$i  &> /dev/null
    if [ $? -eq 0 ];then
-       echo "192.168.4.$i��pingͨ"
+       echo "192.168.4.$i能ping通"
        let a++
    else
-       echo "192.168.4.$i����pingͨ"
+       echo "192.168.4.$i不能ping通"
        let b++
    fi
 done
-echo "��pingͨ$ą������pingͨ$b̨"
+echo "能ping通$a台；不能ping通$b台"
 
 
-13.��д�ű�����192.168.4.0/24������������Щ�������ڿ���״̬����Щ�������ڹػ�״̬��while�汾��
+13.编写脚本测试192.168.4.0/24整个网段中哪些主机处于开机状态，哪些主机处于关机状态（while版本）
 #!/bin/bash
 i=1
 while [ $i -le 254 ]
 do
    ping -c 2 -i 0.1 -w 1 192.168.4.$i  &> /dev/null
    if [ $? -eq 0 ];then
-       echo "192.168.4.$i��pingͨ"
+       echo "192.168.4.$i能ping通"
        let a++
    else
-       echo "192.168.4.$i����pingͨ"
+       echo "192.168.4.$i不能ping通"
        let b++
    fi
    let i++
 done
-echo "��pingͨ$ą������pingͨ$b̨"
+echo "能ping通$a台；不能ping通$b台"
 
 
-14.��д�ű�����192.168.4.0/24������������Щ�������ڿ���״̬����Щ�������ڹػ�״̬������̰汾��
+14.编写脚本测试192.168.4.0/24整个网段中哪些主机处于开机状态，哪些主机处于关机状态（多进程版本）
 #!/bin/bash
-myping () {  #//���庯��
+myping () {  #//定义函数
   ping -c 1 -i 0.1 -w 1 $1 &> /dev/null
   if [ $? -eq 0 ];then
-     echo "$1��pingͨ"
+     echo "$1能ping通"
   else
-     echo "$1����pingͨ"
+     echo "$1不能ping通"
   fi
 }
 
 for i in {1..254}
 do
-  myping 172.25.0.$i &  #//ʹ�øոն������myping������&��ʾ�����̨����
+  myping 172.25.0.$i &  #//使用刚刚定定义的myping函数，&表示放入后台运行
 done
-wait  #//wait����������ǵȴ����к�̨���̶������Ž����ű�
+wait  #//wait命令的作用是等待所有后台进程都结束才结束脚本
 
 
-15.��д�ű�����ʾ���������˽ű������⣩
+15.编写脚本，显示进度条（此脚本有问题）
 #!/bin/bash
 jindu () {
 while :
@@ -277,12 +277,12 @@ done
 jindu &
 cp -a $1 $2
 killall $!
-echo "�������"
+echo "拷贝完成"
 
 
 
 
-17.9*9�˷�������дshell�ű�����ӡ9*9�˷�����
+17.9*9乘法表（编写shell脚本，打印9*9乘法表）
 #!/bin/bash
 a=1
 b=1
@@ -297,19 +297,19 @@ do
 done
 
 
-18.ʹ����ѭ��ʵʱ��ʾeth0�������͵����ݰ�����
+18.使用死循环实时显示eth0网卡发送的数据包流量
 #!/bin/bash
 while :
 do
-   echo "��������eth0������Ϣ���£�"
-   ifconfig eth0  | grep -h "RX p" | awk '{print "������Ϊ��"$5"�ֽ�"}'
-   ifconfig eth0  | grep -h "TX p" | awk '{print "������Ϊ��"$5"�ֽ�"}'
+   echo "本地网卡eth0流量信息如下："
+   ifconfig eth0  | grep -h "RX p" | awk '{print "接收量为："$5"字节"}'
+   ifconfig eth0  | grep -h "TX p" | awk '{print "发送量为："$5"字节"}'
    sleep 2
 done
 
 
-19.ʹ��user.txt�ļ��е���Ա�������ڼ�������Զ�������Ӧ���˻������ó�ʼ����
-]# vim user.txt  #//��������Ա�����ļ�
+19.使用user.txt文件中的人员名单，在计算机中自动创建对应的账户并配置初始密码
+]# vim user.txt  #//创建此人员名单文件
 zhangsan
 lisi
 dc
@@ -326,7 +326,7 @@ do
 done
 
 
-20.��д�����޸���չ���ű�����������txt�ļ��޸�Ϊdoc�ļ�
+20.编写批量修改扩展名脚本，如批量将txt文件修改为doc文件
 #!/bin/bash
 for i in ls *.$1
 do
@@ -334,21 +334,21 @@ do
 done
 
 
-21.ʹ��expect�����Զ���������Զ�������������Ը��������а�װhttpd����
+21.使用expect工具自动交互密码远程其他主机并对该主机进行安装httpd软件
 #!/bin/bash
-yum -y install expect  &> /dev/null  #//��װexpect����
-which expect  &> /dev/null   #//����expect����
-rm -rf ~/.ssh/known_hosts  #//ɾ�����ļ���sshԶ���κ���������ѯ���Ƿ�ȷ��Ҫ���Ӹ�����
-expect << EOF   #//����expect������<<EOF�޶�һ����Χ����ʲô�ط���ʼ����ʲô�ط�����
-spawn ssh 172.25.0.10   #//��������ʽ���̣�spawn����Ҫ�ɵ���;�����ϣ��sshʱ����yes/no����ʾ,��������ɸ�Ϊspawn ssh -o StrictHostKeyChecking=no 172.25.0.10������expect "yes/no"  { send "yes\r" }���оͿ���ʡ��
-expect "yes/no"  { send "yes\r" }     #//�Զ�����yes,"\r"��ʾ�س�                       
-expect "password:" { send "redhat\r" }  #//�Զ���������redhat,"\r"��ʾ�س�
-expect "#" { send "yum -y install httpd &> /dev/null\r" }   #//��װhttpd���� ,"\r"��ʾ�س� 
-expect "#" { send "exit\r" }  #//�˳�Զ�̵�¼,"\r"��ʾ�س�  
-expect "#" { send "exit\r" }  #//�ű������һ��Ĭ�ϲ�ִ��,���������ӣ�����ִ��,"\r"��ʾ�س�
-EOF  #//��������expect����
+yum -y install expect  &> /dev/null  #//安装expect软件
+which expect  &> /dev/null   #//运行expect软件
+rm -rf ~/.ssh/known_hosts  #//删除此文件后，ssh远程任何主机都会询问是否确认要连接该主机
+expect << EOF   #//调用expect软件，<<EOF限定一个范围，从什么地方开始，在什么地方结束
+spawn ssh 172.25.0.10   #//创建交互式进程，spawn带表要干的事;如果不希望ssh时出现yes/no的提示,此行命令可改为spawn ssh -o StrictHostKeyChecking=no 172.25.0.10，下面expect "yes/no"  { send "yes\r" }这行就可以省略
+expect "yes/no"  { send "yes\r" }     #//自动输入yes,"\r"表示回车                       
+expect "password:" { send "redhat\r" }  #//自动输入密码redhat,"\r"表示回车
+expect "#" { send "yum -y install httpd &> /dev/null\r" }   #//安装httpd软件 ,"\r"表示回车 
+expect "#" { send "exit\r" }  #//退出远程登录,"\r"表示回车  
+expect "#" { send "exit\r" }  #//脚本的最后一行默认不执行,此行做样子，不会执行,"\r"表示回车
+EOF  #//结束调用expect软件
 
-��ʽ��
+格式：
 expect {
   "yes/no" { send "yes\r";exp_continue }
    "passeord:" { send "$passwd\r" }
@@ -393,7 +393,7 @@ expect {
 
 
 
-108.�����������Nginx������װ
+108.在虚拟机进行Nginx软件安装
 #!/bin/bash
 yum -y install gcc pcre-devel openssl-devel &> /dev/null
 useradd -s /sbin/nologin nginx
@@ -404,16 +404,16 @@ cd /root/nginx-1.12.2
 --prefix=/usr/local/nginx \
 --user=nginx \
 --group=nginx \
---with-http_ssl_module &> /dev/null  \  #//����SSL���ܹ��� 
---with-stream  \   #//����4�㷴���������
---with-http_stub_status_module   #//����status״̬ҳ��
+--with-http_ssl_module &> /dev/null  \  #//开启SSL加密功能 
+--with-stream  \   #//开启4层反向代理功能
+--with-http_stub_status_module   #//开启status状态页面
 make  &> /dev/null
 make install &> /dev/null
 ln -s /usr/local/nginx/sbin/nginx /sbin/
 nginx
 firefox $(ifconfig eth0 | awk '/inet /{print $2}')
 
-#����Ϊ��������:
+#以下为升级部分:
 #tar -xf /root/lnmp_soft/nginx-1.15.8.tar.gz
 #/root/nginx-1.15.8/comfigure \
 #--prefix=/usr/local/nginx \
@@ -428,7 +428,7 @@ firefox $(ifconfig eth0 | awk '/inet /{print $2}')
 #nginx
 #firefox $(ifconfig eth0 | awk '/inet /{print $2}')
 
-#�������û���֤��
+#以下是用户认证：
 sed -i '/^ *server_name/aauth_basic_user_file "/usr/local/nginx/pass";' /usr/local/nginx/conf/nginx.conf
 sed -i '/^ *server_name/aauth_basic "Input Password";' /usr/local/nginx/conf/nginx.conf
 yum -y install httpd-tools &> /dev/null
@@ -446,7 +446,7 @@ nginx -s reload
 firefox $(ifconfig eth0 | awk '/inet /{print $2}')
 sleep 5
 
-#����Ϊ�����������������
+#以下为基于域名配虚拟机：
 sed -i '/^ *server_name/cserver_name www.a.com;' /usr/local/nginx/conf/nginx.conf
 sed -i '/^ *root html/croot www;' /usr/local/nginx/conf/nginx.conf
 mkdir /usr/local/nginx/www
@@ -456,7 +456,7 @@ a=$(ifconfig eth0 | awk '/inet /{print $2}')
 echo "$a www.a.com" >> /etc/hosts
 firefox www.a.com
 
-#����ΪSSL��������
+#以下为SSL虚拟主机
 yum -y install expect &> /dev/null
 cd /usr/local/nginx/conf
 openssl genrsa > cert.key
@@ -512,7 +512,7 @@ Email Address []:
 
 
 
-108.����LNMP������ƽ̨(Nginx��̬��վ)
+108.部署LNMP环境及平台(Nginx动态网站)
 #!/bin/bash
 yum -y install gcc pcre-devel openssl-devel &> /dev/null
 yum -y install   mariadb   mariadb-server  mariadb-devel  php   php-mysql  php-fpm  &> /dev/null
@@ -520,7 +520,7 @@ useradd -s /sbin/nologin nginx
 #tar -xf /root/lnmp_soft.tar.gz
 tar -xf /root/nginx-1.12.2.tar.gz
 cd /root/nginx-1.12.2
-#--with-stream����SSL���ܹ���; --with-stream����4�㷴���������;--with-http_stub_status_module����status״̬ҳ��
+#--with-stream开启SSL加密功能; --with-stream开启4层反向代理功能;--with-http_stub_status_module开启status状态页面
 ./configure \
 --prefix=/usr/local/nginx \
 --user=nginx \
@@ -547,7 +547,7 @@ firefox $(ifconfig eth0 | awk '/inet /{print $2}')/test.php
 firefox $(ifconfig eth0 | awk '/inet /{print $2}')/mysql.php
 
 
-109.����Nginx���ȷ�����
+109.部署Nginx调度服务器
 #!/bin/bash
 yum -y install gcc pcre-devel openssl-devel &> /dev/null
 yum -y install   mariadb   mariadb-server  mariadb-devel  php   php-mysql  php-fpm  &> /dev/null
@@ -555,7 +555,7 @@ useradd -s /sbin/nologin nginx
 #tar -xf /root/lnmp_soft.tar.gz
 tar -xf /root/nginx-1.12.2.tar.gz
 cd /root/nginx-1.12.2
-#--with-stream����SSL���ܹ���; --with-stream����4�㷴���������;--with-http_stub_status_module����status״̬ҳ��
+#--with-stream开启SSL加密功能; --with-stream开启4层反向代理功能;--with-http_stub_status_module开启status状态页面
 ./configure \
 --prefix=/usr/local/nginx \
 --user=nginx \
@@ -584,7 +584,7 @@ firefox $(ifconfig eth0 | awk '/inet /{print $2}')/test.php
 firefox $(ifconfig eth0 | awk '/inet /{print $2}')/mysql.php
 
 
-109.��LVS��������ѧ����
+109.对LVS健康检查教学案例
 vim check.sh
 #!/bin/bash
 VIP=192.168.4.15:80
@@ -605,17 +605,17 @@ sleep 1
 done
 
 
-109.�Զ˿ڽ�����鼰��ҳҳ���Ƿ񱻴۸Ľ������
+109.对端口健康检查及网页页面是否被篡改健康检查
 #!/bin/bash
 while :
 do
-  a=`curl -s http://192.168.4.85:80 | md5sum | awk '{ print $1 }'`  #//���index.htmlҳ���md5sumֵ��md5sum /usr/local/nginx/html/index.html
+  a=`curl -s http://192.168.4.85:80 | md5sum | awk '{ print $1 }'`  #//检测index.html页面的md5sum值。md5sum /usr/local/nginx/html/index.html
   b=`curl -s http://192.168.4.85:80 | md5sum | awk '{ print $1 }'`
   if [ $a != "add01695584033c5b96d04b148f3d249" ];then
-    echo "192.168.4.130����ҳ���۸Ļ�web��ֹͣ����"
+    echo "192.168.4.130的网页被篡改或web已停止服务"
   fi
   if [ $b != "5608eb49cc52b0326c899536f24ecd1b" ];then
-    echo "192.168.4.140����ҳ���۸Ļ�web��ֹͣ����"
+    echo "192.168.4.140的网页被篡改或web已停止服务"
   fi
 sleep 3
 clear
@@ -628,7 +628,7 @@ done
 
 
 
-110.����IP��ַ�Ľű�setip    find / -name setip
+110.设置IP地址的脚本setip    find / -name setip
 #!/bin/bash
 confip(){
 ip1=$(echo $ip | awk -F "." '{print $1}')
@@ -696,7 +696,7 @@ esac
 
 
 
-109.ÿ��5��03��03���Զ�ִ�нű������־�и��
+109.每周5的03点03分自动执行脚本完成日志切割工作
 ]# vim /usr/local/nginx/logbak.sh
 #!/bin/bash
 date=`date +%Y%m%d`
@@ -708,32 +708,32 @@ kill -USR1 $(cat $logpage/nginx.pid)
 03 03 * * 5  /usr/local/nginx/logbak.sh
 
 
-110.�������ٿؽű�����ʾ����ӵ���˻���������ǰ��¼�˻��������������еĽ����У�cpuƽ�����أ�����ʣ���ڴ棬Ӳ��ʣ��ռ䣬����eth0���յ�����������ǰ������װ������������
+110.服务器临控脚本：显示主机拥有账户总数，当前登录账户数量，主机运行的进程有，cpu平均负载，主机剩余内存，硬盘剩余空间，网卡eth0接收的数据量，当前主机安装的软件包数量
 #!/bin/bash
 while :
 do
-awk '{x++}END{print "����ӵ���˻�������"x"��"}' /etc/passwd
-who | wc -l | awk '{print "��ǰ��¼�˻�������"$1"��"}'
-ps aux | wc -l |awk '{print "�������еĽ�����"$1"��"}'
-uptime | awk '{print "cpuƽ��������"$10,$11,$12}'
-free -h | awk '/^Mem/{print "����ʣ���ڴ���"$4}'
-df -h | awk '/vda1/{print "Ӳ��ʣ��ռ���"$4}'
-ifconfig eth0 |awk '/RX p/{print "����eth0���յ���������"$5"�ֽ�"}'
-rpm -qa | wc -l | awk '{print "��ǰ������װ��������������"$1}'
-sleep 2 #//��Ϣ2�룬��ֹcpu��Դ�ľ�
-clear  #//�������൱��ctrl+l
+awk '{x++}END{print "主机拥有账户总数是"x"个"}' /etc/passwd
+who | wc -l | awk '{print "当前登录账户数量是"$1"个"}'
+ps aux | wc -l |awk '{print "主机运行的进程有"$1"个"}'
+uptime | awk '{print "cpu平均负载是"$10,$11,$12}'
+free -h | awk '/^Mem/{print "主机剩余内存是"$4}'
+df -h | awk '/vda1/{print "硬盘剩余空间是"$4}'
+ifconfig eth0 |awk '/RX p/{print "网卡eth0接收的数据量是"$5"字节"}'
+rpm -qa | wc -l | awk '{print "当前主机安装的软件包数量是"$1}'
+sleep 2 #//休息2秒，防止cpu资源耗尽
+clear  #//清屏，相当于ctrl+l
 done
 
 
-111.�˻���ȫ�ٿؽű���������˷��ʱ�������򱾻��˻������󳬹�3�εľͰѸ�IP��ַ�������ǽ���Σ����������ʼ�������Ա��
+111.账户安全临控脚本：如果有人访问本机密码或本机账户名错误超过3次的就把该IP地址拉入防火墙屏蔽，并发报警邮件给管理员。
 #!/bin/bash
-x=`awk '/Failed/{ip[$11]++}END{for(i in ip){print i","ip[i]}}' /var/log/secure`  #//����ƥ������ʧ�ܵ�ip
-m=`awk '/Invalid/{ip[$10]++}END{for(i in ip){print i","ip[i]}}' /var/log/secure` #//����ƥ��ʧ�ܵ��û�����ip
+x=`awk '/Failed/{ip[$11]++}END{for(i in ip){print i","ip[i]}}' /var/log/secure`  #//正则匹配密码失败的ip
+m=`awk '/Invalid/{ip[$10]++}END{for(i in ip){print i","ip[i]}}' /var/log/secure` #//正则匹配失败的用户名的ip
 for i in $x $m
 do
   a=${i%,*}
   b=${i#*,}
-  [ $b -gt 3 ] && echo "������$a���ʱ���ʧ����$b�Σ��Ͻ�����" | mail -s test root && firewall-cmd --zone=public --add-source=$a &> /dev/null
+  [ $b -gt 3 ] && echo "报警！$a访问本机失败了$b次，赶紧处理" | mail -s test root && firewall-cmd --zone=public --add-source=$a &> /dev/null
 done
 
 
